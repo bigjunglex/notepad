@@ -10,12 +10,10 @@ class Post
     return post_types[type].new
   end
 
-  def self.find(limit, type, id)
+  def self.find_by_id(id)
     db = SQLite3::Database.open(@@DB_FILE)
     #known id, vozvrat posta
-    if  !id.nil?
       db.results_as_hash = true
-
       result = db.execute("SELECT * FROM posts WHERE rowid = ?", id)
       result = result[0] if result.is_a? Array
       db.close
@@ -28,8 +26,10 @@ class Post
 
         return post
       end
-    else
+  end
+  def self.find_all(limit, type)
       #vozvrat tablicu
+      db = SQLite3::Database.open(@@DB_FILE)
       db.results_as_hash = false
       query = "SELECT rowid, * FROM posts "
       query += "WHERE type = :type " unless type.nil?
@@ -48,7 +48,7 @@ class Post
 
     end
 
-  end
+
 
   def initialize
     @created_at = Time.now
@@ -71,7 +71,7 @@ class Post
   end
 
   def file_path
-    current_path = 'D:\kringe\RUBYTUT\lesson6\notepad'
+    current_path = File.dirname(__FILE__)
     file_name = @created_at.strftime("#{self.class.name}_%Y-%m-%d_%H-%M-%S.txt")
     return "#{current_path}/#{file_name}"
   end
@@ -88,7 +88,6 @@ class Post
 
     insert_row_id = db.last_insert_row_id
     db.close
-
     return insert_row_id
   end
 
@@ -103,3 +102,4 @@ class Post
     @created_at = Time.parse(data_hash['created_at'])
   end
 end
+
